@@ -6,7 +6,7 @@
 #include <util/delay.h>
 #include "ff.h"		/* Declarations of FatFs API */
 #include "uart.h"
-//#include "delay.h"
+#include "version.h"
 
 FATFS FatFs;		/* FatFs work area needed for each volume */
 FIL Fil;			/* File object needed for each open file */
@@ -32,7 +32,11 @@ int main (void)
 	
 	
 	uart_init(19200UL);
-	uart_sends("GSP Logger test\n");
+	
+    uart_sends("=== GSP Logger ===\n");
+    uart_sends("build: ");
+    uart_sends(sw_version);
+    uart_sends("\n");
 
 	if((rc = f_mount(&FatFs, "", 0)) != FR_OK)		/* Give a work area to the default drive */
 	{
@@ -40,26 +44,21 @@ int main (void)
 	}
 	uart_sends("f_mount [OK]\n");
 	
-	if((rc = f_mkdir("sub2")) != FR_OK)
+	if((rc = f_mkdir("sub1")) != FR_OK)
 	{
 		ERROR("f_mkdir failed ", rc);	
 	}
 	uart_sends("f_mkdir [OK]\n");
 	
 		
-	if((rc = f_open(&Fil, "sub2/newfile.txt", FA_WRITE | FA_CREATE_ALWAYS)) != FR_OK)
+	if((rc = f_open(&Fil, "sub1/newfile.txt", FA_WRITE | FA_CREATE_ALWAYS)) != FR_OK)
 	{
 		ERROR("f_open failed ", rc);	
 	}
 	
-	f_write(&Fil, "It works!\r\n", 11, &bw);	/* Write data to the file */
-	f_printf(&Fil, "fprintf test %d", 1234); 
+	f_printf(&Fil, "GPS Logger, sw_version=%s\n", sw_version); 
 	f_close(&Fil); /* Close the file */
-	
-	if(11 == bw)
-	{
-		uart_sends("File write success!\n");	
-	}
+	uart_sends("File write complete\n");
 	
 	while(1)
     {
