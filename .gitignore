@@ -7,6 +7,12 @@
 *.obj
 *.elf
 
+# AVR specific files
+
+*.eep
+*.lss
+*.sym
+
 # Linker output
 *.ilk
 *.map
@@ -50,3 +56,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Obj directories
+obj/

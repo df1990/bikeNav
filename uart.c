@@ -32,11 +32,3 @@ void uart_sends(const char *str)
     }
 }
 
-void xmit(char c)
-{
-    while ( !( UCSR0A & (1<<UDRE0)) )
-    {          
-        /* wait fot transmit buffer */
-    }
-    UDR0 = c;
-}
