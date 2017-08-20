@@ -27,11 +27,9 @@ void ERROR(const char *str, uint32_t ecode)
 
 int main (void)
 {
-	UINT bw;
-	FRESULT rc;
+    FRESULT rc;
 	
-	
-	uart_init(19200UL);
+    uart_init(19200UL);
 	
     uart_sends("=== GSP Logger ===\n");
     uart_sends("build: ");
