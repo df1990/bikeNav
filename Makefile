@@ -253,7 +253,7 @@ EXTRALIBDIRS =
 
 EXTMEMOPTS =
 
-USERSECTIONS = -Wl,--section-start=.fw_version=0x80000
+USERSECTIONS = -Wl,--section-start=.fw_version=0x6FF0
 
 
 
