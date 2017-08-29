@@ -25,6 +25,10 @@ void ERROR(const char *str, uint32_t ecode)
     }
 }
 
+/*#if(FLASHEND == 0x7FFF)
+#error "DUPA"
+#endif*/
+
 int main (void)
 {
     FRESULT rc;
@@ -33,7 +37,7 @@ int main (void)
 	
     uart_sends("=== GSP Logger ===\n");
     uart_sends("build: ");
-    uart_sends(sw_version);
+    uart_sends(fw_version);
     uart_sends("\n");
 
 	if((rc = f_mount(&FatFs, "", 0)) != FR_OK)		/* Give a work area to the default drive */
@@ -54,7 +58,7 @@ int main (void)
 		ERROR("f_open failed ", rc);	
 	}
 	
-	f_printf(&Fil, "GPS Logger, sw_version=%s\n", sw_version); 
+	f_printf(&Fil, "GPS Logger, fw_version=%s\n", fw_version); 
 	f_close(&Fil); /* Close the file */
 	uart_sends("File write complete\n");
 	

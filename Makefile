@@ -39,6 +39,7 @@
 # To rebuild project do "make clean" then "make all".
 #----------------------------------------------------------------------------
 
+include version.mak
 
 # MCU name
 MCU = atmega328p
@@ -126,7 +127,7 @@ CSTANDARD = -std=gnu99
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
-
+CDEFS += -DFW_VERSION=\"$(FW_VERSION)\"
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
@@ -134,6 +135,7 @@ ADEFS = -DF_CPU=$(F_CPU)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS = -DF_CPU=$(F_CPU)UL
+CPPDEFS += -DFW_VERSION=$(FW_VERSION)
 #CPPDEFS += -D__STDC_LIMIT_MACROS
 #CPPDEFS += -D__STDC_CONSTANT_MACROS
 
@@ -163,7 +165,7 @@ CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wa,-adhlns=$(<:%.c=$(OBJDIR)/%.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
-
+#CFLAGS += -Wl,--section-start=.fw_version=0x100
 
 #---------------- Compiler Options C++ ----------------
 #  -g*:          generate debugging information
@@ -251,14 +253,17 @@ EXTRALIBDIRS =
 
 EXTMEMOPTS =
 
+USERSECTIONS = -Wl,--section-start=.fw_version=0x80000
+
 
 
 #---------------- Linker Options ----------------
 #  -Wl,...:     tell GCC to pass this to linker.
 #    -Map:      create map file
-#    --cref:    add cross reference to  map file
+#    --cref:    add cross reference to  map fil
 LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
 LDFLAGS += $(EXTMEMOPTS)
+LDFLAGS += $(USERSECTIONS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
 LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 #LDFLAGS += -T linker_script.x
