@@ -24,5 +24,13 @@ uint8_t gpio_read(volatile uint8_t* PIN, uint8_t P)
 
 void gpio_shiftout(volatile uint8_t* PORT_data, uint8_t P_data, volatile uint8_t* PORT_clk, uint8_t P_clk,  uint8_t data, dataOrd order)
 {
+    uint8_t mask = (DORD_MSBFIRST == order) ? 0x80 : 0x01;
 
+    while(mask)
+    {
+        gpio_write(PORT_clk, P_clk, 0);
+        gpio_write(PORT_data, P_data, (data & mask));
+        gpio_write(PORT_clk, P_clk, 1);
+        mask = (DORD_MSBFIRST == order) ? mask>>1 : mask<<1;
+    }
 }

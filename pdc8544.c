@@ -1,6 +1,6 @@
 #include "lcd.h"
 #include <avr/io.h>
-//#include "gpio.h"
+#include "gpio.h"
 
 #define SCE_DDR DDRD
 #define SCE_PORT PORTD
@@ -28,23 +28,7 @@
 #define LCD_X     84
 #define LCD_Y     48
 
-#define digitalWrite(PORT, PIN, VALUE) if(VALUE) PORT |= (1 << PIN); else PORT &= ~(1 << PIN);
 
-#define shiftOut(DATA_PORT, DATA_PIN, CLK_PORT, CLK_PIN, MSBFIRST, data) uint8_t i;\
-        if(MSBFIRST){\
-            for(i = 0; i < 8; i++){\
-                digitalWrite(CLK_PORT, CLK_PIN, 0);\
-                digitalWrite(DATA_PORT, DATA_PIN, (data & 0x80));\
-                digitalWrite(CLK_PORT, CLK_PIN, 1);\
-                data <<= 1;}\
-        }\
-        else{\
-            for(i = 0; i < 8; i++){\
-                digitalWrite(CLK_PORT, CLK_PIN, 0);\
-                digitalWrite(DATA_PORT, DATA_PIN, (data & 0x01));\
-                digitalWrite(CLK_PORT, CLK_PIN, 1);\
-                data >>= 1;}\
-        }
 
 static const char ASCII[][5] =
 {
@@ -148,26 +132,24 @@ static const char ASCII[][5] =
         
 static void lcd_write(uint8_t dc, uint8_t data)
 {
-  digitalWrite(DC_PORT, DC_PIN, dc);
-  digitalWrite(SCE_PORT, SCE_PIN, 0);
-  shiftOut(SDIN_PORT, SDIN_PIN, SCLK_PORT, SCLK_PIN, 1, data);
-  digitalWrite(SCE_PORT, SCE_PIN, 1);
+  gpio_write(&DC_PORT, DC_PIN, dc);
+  gpio_write(&SCE_PORT, SCE_PIN, 0);
+  gpio_shiftout(&SDIN_PORT, SDIN_PIN, &SCLK_PORT, SCLK_PIN, data, DORD_MSBFIRST);
+  gpio_write(&SCE_PORT, SCE_PIN, 1);
 }
 
 void lcd_init(void)
 {
     
-    SCE_DDR |= (1 << SCE_PIN); // SCE OUTPUT
-    RESET_DDR |= (1 << RESET_PIN); // RESET OUTPUT
-    DC_DDR |= (1 << DC_PIN); // DC OUTPUT
-    SDIN_DDR |= (1 << SDIN_PIN); // SDIN OUTPUT
-    SCLK_DDR |= (1 << SCLK_PIN); // SCLK OUTPUT
-    
-    
-    
-    digitalWrite(RESET_PORT, RESET_PIN, 0);
-    digitalWrite(RESET_PORT, RESET_PIN, 1);
-    
+    gpio_setmode(&SCE_DDR, SCE_PIN, OUTPUT);
+    gpio_setmode(&RESET_DDR, RESET_PIN, OUTPUT);
+    gpio_setmode(&DC_DDR, DC_PIN, OUTPUT);
+    gpio_setmode(&SDIN_DDR, SDIN_PIN, OUTPUT);
+    gpio_setmode(&SCLK_DDR, SCLK_PIN, OUTPUT);
+
+    gpio_write(&RESET_PORT, RESET_PIN, 0);
+    gpio_write(&RESET_PORT, RESET_PIN, 1);
+
     
     lcd_write(LCD_C, 0x21 );  // LCD Extended Commands.
     lcd_write(LCD_C, 0xB1 );  // Set LCD Vop (Contrast). 
