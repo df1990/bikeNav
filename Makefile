@@ -39,8 +39,6 @@
 # To rebuild project do "make clean" then "make all".
 #----------------------------------------------------------------------------
 
-include version.mak
-
 # MCU name
 MCU = atmega328p
 
@@ -78,9 +76,12 @@ TARGET = main
 #     this an empty or blank macro!
 OBJDIR = ./obj
 
+# List C source files directories here.
+vpath %.c hal/src:lib/fatfs/src:lib/lcd/src:common
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).c ff.c sdmm.c uart.c spi.c pdc8544.c gpio.c
+SRC = gpio.c uart.c spi.c pdc8544.c ff.c sdmm.c $(TARGET).c 
+#   
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -114,7 +115,10 @@ DEBUG = dwarf-2
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRAINCDIRS = 
+EXTRAINCDIRS := common 
+EXTRAINCDIRS += hal/inc
+EXTRAINCDIRS += lib/lcd/inc
+EXTRAINCDIRS += lib/fatfs/inc
 
 
 # Compiler flag to set the C Standard level.
@@ -127,7 +131,6 @@ CSTANDARD = -std=gnu99
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
-CDEFS += -DFW_VERSION=\"$(FW_VERSION)\"
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
@@ -135,7 +138,6 @@ ADEFS = -DF_CPU=$(F_CPU)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS = -DF_CPU=$(F_CPU)UL
-CPPDEFS += -DFW_VERSION=$(FW_VERSION)
 #CPPDEFS += -D__STDC_LIMIT_MACROS
 #CPPDEFS += -D__STDC_CONSTANT_MACROS
 
@@ -162,7 +164,7 @@ CFLAGS += -Wstrict-prototypes
 #CFLAGS += -Wundef
 #CFLAGS += -Wunreachable-code
 #CFLAGS += -Wsign-compare
-CFLAGS += -Wa,-adhlns=$(<:%.c=$(OBJDIR)/%.lst)
+#CFLAGS += -Wa,-adhlns=$(<:%.c=$(OBJDIR)/%.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
 #CFLAGS += -Wl,--section-start=.fw_version=0x100
@@ -189,7 +191,7 @@ CPPFLAGS += -Wundef
 #CPPFLAGS += -Wstrict-prototypes
 #CPPFLAGS += -Wunreachable-code
 #CPPFLAGS += -Wsign-compare
-CPPFLAGS += -Wa,-adhlns=$(<:%.cpp=$(OBJDIR)/%.lst)
+#CPPFLAGS += -Wa,-adhlns=$(<:%.cpp=$(OBJDIR)/%.lst)
 CPPFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 #CPPFLAGS += $(CSTANDARD)
 
@@ -398,7 +400,10 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
-all: begin gccversion sizebefore build sizeafter end
+all: begin fw_version gccversion sizebefore build sizeafter end
+
+fw_version:
+	./version.sh
 
 # Change the build target to build a HEX file or a library.
 build: elf hex eep lss sym
@@ -604,6 +609,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) $(SRC:.c=.i)
 	$(REMOVEDIR) .dep
+	$(REMOVEDIR) $(OBJDIR)
 
 
 # Create object files directory
