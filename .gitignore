@@ -61,5 +61,5 @@ dkms.conf
 # Obj directories
 obj/
 
-# Build version
-version.h
+# Opened files
+*.swp
