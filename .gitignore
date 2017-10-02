@@ -63,3 +63,6 @@ obj/
 
 # Opened files
 *.swp
+
+# Version files
+version.h
