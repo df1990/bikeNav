@@ -9,6 +9,7 @@
 #include "uart.h"
 #include "version.h"
 #include "lcd.h"
+#include "gps.h"
 
 FATFS FatFs;		/* FatFs work area needed for each volume */
 FIL Fil;			/* File object needed for each open file */
@@ -28,28 +29,34 @@ void ERROR(const char *str, uint32_t ecode)
     }
 }
 
+static void hour_convert(char *dst, char *src)
+{
+    uint8_t d_idx = 0;
+    uint8_t s_idx = 0;
+    uint8_t loop_cnt = 0;
+    for(loop_cnt = 0; loop_cnt < 3; loop_cnt++)
+    {
+        dst[d_idx++] = src[s_idx++];
+        dst[d_idx++] = src[s_idx++];
+        dst[d_idx++] = ':';
+    }
+    dst[--d_idx] = 0x00;
+}
+
 int main (void)
 {
+    TNmeaSentence sentence;
+    char hour_raw[11];
+    char hour_formatted[9];
+    
+    uart_init(9600UL);
     lcd_init();
     lcd_clear();
-
-    
-    lcd_puts("Hello world!");
-    lcd_setpos(0, 1);
-    lcd_puts(fw_version);
+    gps_init();
+    gps_sentence_filter_add(nmea_gga,0,hour_raw);
+    sei();
     
     FRESULT rc;
-	
-    uart_init(9600UL);
-	
-    uart_puts("=== GSP Logger ===\n");
-    uart_puts("build: ");
-    uart_puts(fw_version);
-    uart_puts("\n");
-    
-    _delay_ms(5000);
-
-    sei();
     
 	if((rc = f_mount(&FatFs, "", 0)) != FR_OK)		/* Give a work area to the default drive */
 	{
@@ -76,12 +83,37 @@ int main (void)
 	f_close(&Fil);
 	uart_puts("File write complete\n");
 	*/
+    
+    lcd_puts("GSP Logger");
+    lcd_setpos(0, 1);
+    lcd_puts("build:");
+    lcd_setpos(0, 2);
+    lcd_puts(fw_version);
+	
+    uart_puts("=== GSP Logger ===\n");
+    uart_puts("build: ");
+    uart_puts(fw_version);
+    uart_puts("\n");
+    
+    _delay_ms(5000);
+    
+    gps_handler_register();
+    
+    
 	while(1)
     {
-        char c;
-        if(uart_getc(&c))
+        if(nmea_no_sentence != (sentence = gps_nmea_sentence_received()))
         {
-            uart_putc(c);
+            gps_nmea_sentence_clear();
+            if(nmea_gga == sentence)
+            {
+                hour_convert(hour_formatted,hour_raw);
+                uart_puts(hour_formatted);
+                uart_puts("\n");
+                lcd_setpos(0,3);
+                lcd_puts(hour_formatted);
+                
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 #include "lcd.h"
 #include <avr/io.h>
 #include "gpio.h"
+#include "uart.h"
 
 #define SCE_DDR DDRD
 #define SCE_PORT PORTD
@@ -157,6 +158,8 @@ void lcd_init(void)
     lcd_write(LCD_C, 0x14 );  // LCD bias mode 1:48. //0x13
     lcd_write(LCD_C, 0x20 );  // LCD Basic Commands
     lcd_write(LCD_C, 0x0C );  // LCD in normal mode.
+    
+    uart_puts("LCD init [OK]\n");
 }
 
 void lcd_clear(void)
@@ -182,12 +185,22 @@ int lcd_putchar(char c)
 
 int lcd_puts(const char *s)
 {
-    char *c = s;
-    while(*c)
+    //char *c = s;
+    while(*s)
     {
-        lcd_putchar(*c++);   
+        lcd_putchar(*s++);   
     }
     return 0;
+}
+
+int lcd_putsn(const char *s, uint8_t cnt)
+{
+    uint8_t str_cnt = 0;
+    while((*s) && (str_cnt++ < cnt))
+    {
+        lcd_putchar(*s++);
+    }
+    return str_cnt;
 }
 
 void lcd_setpos(int x, int y)

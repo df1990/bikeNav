@@ -77,10 +77,10 @@ TARGET = main
 OBJDIR = ./obj
 
 # List C source files directories here.
-vpath %.c hal/src:lib/fatfs/src:lib/lcd/src:common
+vpath %.c hal/src:lib/fatfs/src:lib/lcd/src:lib/gps/src:common
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = gpio.c uart.c spi.c pdc8544.c ff.c sdmm.c $(TARGET).c 
+SRC = gpio.c uart.c spi.c pdc8544.c ff.c sdmm.c gps.c $(TARGET).c 
 #   
 
 
@@ -119,6 +119,7 @@ EXTRAINCDIRS := common
 EXTRAINCDIRS += hal/inc
 EXTRAINCDIRS += lib/lcd/inc
 EXTRAINCDIRS += lib/fatfs/inc
+EXTRAINCDIRS += lib/gps/inc
 
 
 # Compiler flag to set the C Standard level.
