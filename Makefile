@@ -256,7 +256,7 @@ EXTRALIBDIRS =
 
 EXTMEMOPTS =
 
-USERSECTIONS = -Wl,--section-start=.fw_version=0x6FF0
+USERSECTIONS = -Wl,--section-start=.firmware_version=0x6FF0
 
 
 
