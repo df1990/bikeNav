@@ -3,24 +3,28 @@
 #include "nmea.h"
 #include <stdint.h>
 
-#define NMEA_FILTERS_CNT 5
-#define NMEA_FILTER_FIELDS_CNT 5
+#define NMEA_FILTERS_CNT_MAX 5
+#define NMEA_FIELDS_CNT_MAX 6
 
 typedef enum {
     Gps_OK = 0,
-    Gps_Sentence_Invalid,
-    Gps_Sentence_List_Full,
-    Gps_Sentence_List_Empty,
+    Gps_Err_Sentence_Invalid,
+    Gps_Err_Filter_List_Full,
+    Gps_Err_Fields_List_Full,
+    Gps_Err_Arg_Invalid,
+    Gps_Err_Filter_Invalid,
+    Gps_Err_Field_Invalid,
     Gps_Err_Not_Implemented,
-    Gps_Err_Arg_Invalid
 } TGpsRetVal;
 
 TGpsRetVal gps_init(void);
-TGpsRetVal gps_handler_register(void);
-TGpsRetVal gps_sentence_filter_add(TNmeaSentence sentence, uint8_t field_id, uint8_t* field_buff);
-TGpsRetVal gps_sentence_filter_remove(TNmeaSentence sentence, uint8_t field_id);
+uint8_t gps_nmea_rx_complete(void);
+void gps_nmea_rx_clear(void);
+char *gps_get_nmea_rx_buff(void);
+TGpsRetVal gps_filter_add(const char *nmea_name, uint8_t *filter_id);
+TGpsRetVal gps_field_add(uint8_t filter_id, uint8_t field_id, char *field_buff);
+TGpsRetVal gps_nmea_rx_check(uint8_t *filter_id);
 
-TNmeaSentence gps_nmea_sentence_received(void);
-void gps_nmea_sentence_clear(void);
+
 
 #endif

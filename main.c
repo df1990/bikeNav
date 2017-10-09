@@ -29,6 +29,7 @@ void ERROR(const char *str, uint32_t ecode)
     }
 }
 
+/*
 static void hour_convert(char *dst, char *src)
 {
     uint8_t d_idx = 0;
@@ -41,19 +42,68 @@ static void hour_convert(char *dst, char *src)
         dst[d_idx++] = ':';
     }
     dst[--d_idx] = 0x00;
-}
+}*/
+
+static uint8_t gpgga_filter = 0;
+static uint8_t gprmc_filter = 0;
+static uint8_t gpvtg_filter = 0;
+static uint8_t received_sentence;
 
 int main (void)
 {
-    TNmeaSentence sentence;
-    char hour_raw[11];
-    char hour_formatted[9];
+    char hour_raw[11] = "";
+    char latitude[10] = "";
+    char ns_ind[2] = "";
+    char longtitude[11] = "";
+    char we_ind[2] = "";
+    char gps_fix[2] = "";
+    //char hour_formatted[9] = "";
+    //uint8_t hour_inv;
     
     uart_init(9600UL);
     lcd_init();
     lcd_clear();
     gps_init();
-    gps_sentence_filter_add(nmea_gga,0,hour_raw);
+    
+    if(Gps_OK == gps_filter_add("GPGGA",&gpgga_filter))
+    {
+        uart_puts("GPGGA filter add [OK]\n");
+        if(Gps_OK == gps_field_add(gpgga_filter,0,hour_raw))
+        {
+            uart_puts("GPGGA field 0 add [OK]\n");
+        }
+        if(Gps_OK == gps_field_add(gpgga_filter,5,gps_fix))
+        {
+            uart_puts("GPGGA field 5 add [OK]\n");
+        }
+        
+        if(Gps_OK == gps_field_add(gpgga_filter,1,latitude))
+        {
+            uart_puts("GPGGA field 1 add [OK]\n");
+        }
+        if(Gps_OK == gps_field_add(gpgga_filter,2,ns_ind))
+        {
+            uart_puts("GPGGA field 2 add [OK]\n");
+        }
+        
+        if(Gps_OK == gps_field_add(gpgga_filter,3,longtitude))
+        {
+            uart_puts("GPGGA field 3 add [OK]\n");
+        }
+        if(Gps_OK == gps_field_add(gpgga_filter,4,we_ind))
+        {
+            uart_puts("GPGGA field 4 add [OK]\n");
+        }
+    }
+    if(Gps_OK == gps_filter_add("GPRMC",&gprmc_filter))
+    {
+        uart_puts("GPRMC filter add [OK]\n");
+    }
+    if(Gps_OK == gps_filter_add("GPVTG",&gpvtg_filter))
+    {
+        uart_puts("GPVTG filter add [OK]\n");
+    }
+    //gps_nmea_trace_add("GPGGA",1,hour_raw);
     sei();
     
     FRESULT rc;
@@ -97,24 +147,53 @@ int main (void)
     
     _delay_ms(5000);
     
-    gps_handler_register();
+    //gps_handler_register();
     
     
 	while(1)
     {
-        if(nmea_no_sentence != (sentence = gps_nmea_sentence_received()))
+        if(gps_nmea_rx_complete())
         {
-            gps_nmea_sentence_clear();
-            if(nmea_gga == sentence)
+            gps_nmea_rx_clear();
+            if(Gps_OK == gps_nmea_rx_check(&received_sentence))
             {
-                hour_convert(hour_formatted,hour_raw);
-                uart_puts(hour_formatted);
-                uart_puts("\n");
-                lcd_setpos(0,3);
-                lcd_puts(hour_formatted);
-                
+                if(gpgga_filter == received_sentence)
+                {
+                    //uart_puts("GPGGA rx\n");
+                    uart_puts(hour_raw);
+                    uart_puts(" ");
+                    uart_puts(gps_fix);
+                    uart_puts("\n");
+                    
+                    lcd_setpos(0, 3);
+                    lcd_puts(latitude);
+                    lcd_puts(" ");
+                    lcd_puts(ns_ind);
+                    
+                    lcd_setpos(0, 4);
+                    lcd_puts(longtitude);
+                    lcd_puts(" ");
+                    lcd_puts(we_ind);
+                }
+                else if(gprmc_filter == received_sentence)
+                {
+                    //uart_puts("GPRMC rx\n");
+                }
+                else if(gpvtg_filter == received_sentence)
+                {
+                    //uart_puts("GPVTG rx\n");
+                }
             }
         }
+        /*if(hour_raw[0])
+        {
+            hour_convert(hour_formatted,hour_raw);
+            uart_puts(hour_formatted);
+            uart_puts("\n");
+            lcd_setpos(0,3);
+            lcd_puts(hour_formatted);
+            hour_raw[0] = 0x00;
+        }*/
     }
 }
 
