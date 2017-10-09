@@ -29,7 +29,7 @@ void ERROR(const char *str, uint32_t ecode)
     }
 }
 
-/*
+
 static void hour_convert(char *dst, char *src)
 {
     uint8_t d_idx = 0;
@@ -42,21 +42,22 @@ static void hour_convert(char *dst, char *src)
         dst[d_idx++] = ':';
     }
     dst[--d_idx] = 0x00;
-}*/
+}
 
 static uint8_t gpgga_filter = 0;
-static uint8_t gprmc_filter = 0;
-static uint8_t gpvtg_filter = 0;
+static uint8_t gpgsv_filter = 0;
 static uint8_t received_sentence;
 
 int main (void)
 {
     char hour_raw[11] = "";
+    char hour_conv[9] = "";
     char latitude[10] = "";
     char ns_ind[2] = "";
     char longtitude[11] = "";
     char we_ind[2] = "";
     char gps_fix[2] = "";
+    char satelites[3] = "";
     //char hour_formatted[9] = "";
     //uint8_t hour_inv;
     
@@ -95,13 +96,13 @@ int main (void)
             uart_puts("GPGGA field 4 add [OK]\n");
         }
     }
-    if(Gps_OK == gps_filter_add("GPRMC",&gprmc_filter))
+    if(Gps_OK == gps_filter_add("GPGSV",&gpgsv_filter))
     {
-        uart_puts("GPRMC filter add [OK]\n");
-    }
-    if(Gps_OK == gps_filter_add("GPVTG",&gpvtg_filter))
-    {
-        uart_puts("GPVTG filter add [OK]\n");
+        uart_puts("GPGSV filter add [OK]\n");
+        if(Gps_OK == gps_field_add(gpgsv_filter,2,satelites))
+        {
+            uart_puts("GPGSV field 2 add [OK]\n");
+        }
     }
     //gps_nmea_trace_add("GPGGA",1,hour_raw);
     sei();
@@ -134,18 +135,19 @@ int main (void)
 	uart_puts("File write complete\n");
 	*/
     
-    lcd_puts("GSP Logger");
+    lcd_puts("GPS Logger");
     lcd_setpos(0, 1);
     lcd_puts("build:");
     lcd_setpos(0, 2);
     lcd_puts(fw_version);
 	
-    uart_puts("=== GSP Logger ===\n");
+    uart_puts("=== GPS Logger ===\n");
     uart_puts("build: ");
     uart_puts(fw_version);
     uart_puts("\n");
     
     _delay_ms(5000);
+    lcd_clear();
     
     //gps_handler_register();
     
@@ -159,11 +161,15 @@ int main (void)
             {
                 if(gpgga_filter == received_sentence)
                 {
+                    hour_convert(hour_conv,hour_raw);
                     //uart_puts("GPGGA rx\n");
-                    uart_puts(hour_raw);
+                    uart_puts(hour_conv);
                     uart_puts(" ");
                     uart_puts(gps_fix);
                     uart_puts("\n");
+                    
+                    lcd_setpos(0, 0);
+                    lcd_puts(hour_conv);
                     
                     lcd_setpos(0, 3);
                     lcd_puts(latitude);
@@ -175,14 +181,12 @@ int main (void)
                     lcd_puts(" ");
                     lcd_puts(we_ind);
                 }
-                else if(gprmc_filter == received_sentence)
+                else if(gpgsv_filter == received_sentence)
                 {
-                    //uart_puts("GPRMC rx\n");
+                    lcd_setpos(0, 1);
+                    lcd_puts(satelites);
                 }
-                else if(gpvtg_filter == received_sentence)
-                {
-                    //uart_puts("GPVTG rx\n");
-                }
+
             }
         }
         /*if(hour_raw[0])
