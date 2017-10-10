@@ -171,11 +171,6 @@ int main (void)
                 if(gpgga_filter == received_sentence)
                 {
                     hour_convert(hour_conv,hour_raw);
-                    //uart_puts("GPGGA rx\n");
-                    uart_puts(hour_conv);
-                    uart_puts(" ");
-                    uart_puts(gps_fix);
-                    uart_puts("\n");
                     
                     lcd_setpos(0, 0);
                     lcd_puts(hour_conv);
