@@ -5,6 +5,7 @@
 #include <avr/io.h>	/* Device specific declarations */
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include "ff.h"		/* Declarations of FatFs API */
 #include "uart.h"
 #include "version.h"
@@ -29,7 +30,6 @@ void ERROR(const char *str, uint32_t ecode)
     }
 }
 
-
 static void hour_convert(char *dst, char *src)
 {
     uint8_t d_idx = 0;
@@ -44,12 +44,21 @@ static void hour_convert(char *dst, char *src)
     dst[--d_idx] = 0x00;
 }
 
+static const char string_1[] PROGMEM = "String 1";
+
+static PGM_P const string_table[] PROGMEM = 
+{
+    string_1
+};
+
+
 static uint8_t gpgga_filter = 0;
 static uint8_t gpgsv_filter = 0;
 static uint8_t received_sentence;
 
 int main (void)
 {
+    char fw_version[10];
     char hour_raw[11] = "";
     char hour_conv[9] = "";
     char latitude[10] = "";
@@ -58,8 +67,8 @@ int main (void)
     char we_ind[2] = "";
     char gps_fix[2] = "";
     char satelites[3] = "";
-    //char hour_formatted[9] = "";
-    //uint8_t hour_inv;
+
+    strcpy_P(fw_version,(PGM_P)fw_version_pgm);
     
     uart_init(9600UL);
     lcd_init();
