@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>/home/dariusz/Workspace/SW4STM32_workspace/bikeNav/\bikeNav</ProjectName>
+<ProjectName>/home/dariusz/Workspace/bikeNav/\bikeNav</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>../Drivers/CMSIS</CMSIS>
 <HAL_Driver>/home/dariusz/STM32Cube/Repository//STM32Cube_FW_F1_V1.6.1/Drivers/CMSIS</HAL_Driver>
