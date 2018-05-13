@@ -51,6 +51,7 @@
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
+#include "nmea.h"
 
 /* USER CODE BEGIN Includes */
 
