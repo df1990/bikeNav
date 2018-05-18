@@ -37,6 +37,7 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN 0 */
+extern UART_HandleTypeDef huart2;
 
 /* USER CODE END 0 */
 
@@ -95,6 +96,11 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
+void USART2_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart2);
 }
 
 /* USER CODE BEGIN 1 */

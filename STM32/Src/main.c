@@ -52,6 +52,7 @@
 #include "cmsis_os.h"
 #include "fatfs.h"
 #include "nmea.h"
+#include <string.h>
 
 /* USER CODE BEGIN Includes */
 
@@ -62,6 +63,8 @@ SPI_HandleTypeDef hspi2;
 
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+
+uint8_t tx_complete;
 
 osThreadId defaultTaskHandle;
 
@@ -265,7 +268,7 @@ static void MX_USART3_UART_Init(void)
 {
 
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
+  huart3.Init.BaudRate = 9600;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
@@ -327,14 +330,25 @@ void StartDefaultTask(void const * argument)
 {
   /* init code for FATFS */
   MX_FATFS_Init();
+  tx_complete = 0;
 
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  static char txBuff[] = "COMM TEST\n\r";
+	  HAL_UART_Transmit_IT(&huart2, (uint8_t *)txBuff,strlen(txBuff));
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  osDelay(2000);
+	  while(!tx_complete);
   }
   /* USER CODE END 5 */ 
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: transfer complete */
+  tx_complete = 1;
 }
 
 /**
